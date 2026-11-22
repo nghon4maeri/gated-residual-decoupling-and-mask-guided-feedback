@@ -1,0 +1,11 @@
+Hardware,PyTorch_Version,CUDA_Version,Checkpoint,Mode,Resolution,BatchSize,Precision,Warmup_Iters,Timed_Iters,Mean_Latency_ms,Std_Latency_ms,Median_Latency_ms,IQR_Latency_ms,Throughput_FPS,Peak_Allocated_Mem_MB
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,single_view,384x384,1,FP32,100,200,34.7398,9.0389,33.5478,11.7516,28.79,243.74
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,single_view,512x512,1,FP32,50,150,37.4267,8.4568,36.798,9.8046,26.72,344.27
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,single_view,768x768,1,FP32,30,100,56.2122,6.5573,52.5649,7.6472,17.79,631.46
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,single_view,384x384,1,FP16,100,200,45.692,10.2345,43.3413,13.478,21.89,259.79
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,single_view,512x512,1,FP16,50,150,44.5996,9.7234,42.7527,13.9513,22.42,327.5
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,single_view,768x768,1,FP16,30,100,48.9439,6.3993,48.2165,9.3174,20.43,525.28
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,tta4,384x384,1,FP32,30,100,120.6875,14.4594,120.0287,19.0687,8.29,248.27
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,ms8_gem,384x384,1,FP32,20,50,264.5839,35.8704,257.8383,36.4098,3.78,299.85
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,tta4,384x384,1,FP16,30,100,165.3019,27.6556,157.9947,33.8313,6.05,263.77
+NVIDIA GeForce RTX 4060 Laptop GPU,2.6.0+cu124,12.4,GDFNetV4_ConvFormerS18_300ep_best.pth,ms8_gem,384x384,1,FP16,20,50,328.4716,41.5679,329.4187,47.2813,3.04,299.78
