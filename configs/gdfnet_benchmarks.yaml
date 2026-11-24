@@ -8,28 +8,36 @@ model:
   params_total: 29503181
   state_dict_keys: 534
   decoder_channels: 64
-  drop_path_rate: 0.15
+  drop_path_rate: 0.2
 
 teachers_isic2018:
   M1_canonical_base:
-    loss: "GDFNetCompositeLoss (0.50 StructureLoss[k=31, gamma=5.0] + 0.50 SoftMacroDice, DS weights=[1.0, 0.4, 0.3, 0.2, 0.1])"
-    lr: 5.0e-4
-    llrd: 0.65
+    init: "ImageNet-22K/1K ConvFormer-S18"
+    loss: "GDFNetCompositeLoss (StructureLoss[k=31, w=5.0] + 0.5 SoftMacroDice, DS weights=[1, 1, 0.5, 0.3, 0.2])"
+    lr_backbone: 1.0e-4
+    lr_head: 3.0e-4
+    weight_decay: 2.0e-4
+    scheduler: "CosineAnnealingWarmRestarts(T_0=50, T_mult=2, eta_min=1e-6)"
+    ema_decay: 0.999
     epochs: 300
   M2_multiscale_llrd:
+    init: "ImageNet-22K/1K ConvFormer-S18"
     loss: "GDFNetCompositeLoss + multi-scale training ({352, 384, 448})"
-    lr: 5.0e-4
-    llrd: 0.65
-    epochs: 300
+    lr_backbone_stages: [1.5e-5, 2.5e-5, 4.0e-5, 6.0e-5]
+    lr_head: 2.0e-4
+    ema_decay: 0.998
+    epochs: 60
   M3_feedback_modulated:
     architecture: "FeedbackGDFNet (2-pass spatial feedback modulator)"
     loss: "GDFNetCompositeLoss"
-    lr: 5.0e-4
-    epochs: 300
+    note: "trained inside the distillation pipeline; see scripts/train_distill_realtime.py"
   M4_asymmetric_focal_tversky:
+    init: "M1"
     loss: "AsymmetricFocalTverskyLoss (alpha_FP=0.30, beta_FN=0.70, gamma=4/3, edge_weight=4.0, tversky_weight=1.2)"
-    lr: 3.5e-5
-    epochs: 50
+    lr_backbone_stages: [5.0e-6, 1.0e-5, 2.0e-5, 3.5e-5]
+    lr_head: 6.0e-5
+    ema_decay: 0.995
+    epochs: 20
 
 weight_soup:
   formula: "theta_Soup = 0.70 * theta_M1 + 0.30 * theta_M4"

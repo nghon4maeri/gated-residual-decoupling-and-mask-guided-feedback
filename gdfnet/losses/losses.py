@@ -70,7 +70,7 @@ class GDFNetCompositeLoss(nn.Module):
         probs = torch.sigmoid(pred_logits)
         inter = (probs * targets).sum(dim=(1, 2, 3))
         denom = probs.sum(dim=(1, 2, 3)) + targets.sum(dim=(1, 2, 3))
-        return (1.0 - (2.0 * inter + 1e-5) / (denom + 1e-5)).mean()
+        return (1.0 - (2.0 * inter + 1.0) / (denom + 1.0)).mean()
 
     def _single_head_loss(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         l_struct = self.structure_loss(logits, targets)

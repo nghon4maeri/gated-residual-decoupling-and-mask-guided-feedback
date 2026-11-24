@@ -78,7 +78,7 @@ GDF-Net_GitHub_Release/
 
 #### Option A: Automated CLI Script (Recommended)
 
-Configure your Kaggle API credentials (`~/.kaggle/kaggle.json`) and run [`scripts/download_datasets.py`](scripts/download_datasets.py):
+Configure your Kaggle API credentials (`~/.kaggle/kaggle.json`, or the `KAGGLE_USERNAME` / `KAGGLE_KEY` environment variables used by the notebooks; never commit keys) and run [`scripts/download_datasets.py`](scripts/download_datasets.py):
 
 ```bash
 # Download and prepare all datasets automatically
@@ -193,6 +193,13 @@ python scripts/download_weights.py --out-dir ./checkpoints --download-kaggle --v
 
 # 4. Profile Fixed-Backbone (ConvFormer-S18) Leave-One-Out Ablation Complexity Matrix
 python scripts/run_ablation_suite.py --mode profile
+
+# 4b. Train GDF-Net (Base) on ISIC-2018 with the M1 protocol
+#     (AdamW encoder 1e-4 / decoder 3e-4, wd 2e-4, warm restarts T_0=50, T_mult=2, DropPath 0.2, EMA 0.999, 300 epochs, B=16)
+python scripts/train_base.py   --train-img ./data/ISIC-2018/ISIC2018_Task1-2_Training_Input --train-gt ./data/ISIC-2018/ISIC2018_Task1_Training_GroundTruth   --val-img ./data/ISIC-2018/ISIC2018_Task1-2_Validation_Input --val-gt ./data/ISIC-2018/ISIC2018_Task1_Validation_GroundTruth   --out-dir ./checkpoints/base
+
+# 4c. Train one leave-one-out configuration (Table 3, Panel A) with the same protocol
+python scripts/train_base.py <same data arguments> --ablation cfg1_baseline --out-dir ./checkpoints/cfg1
 
 # 5. Run Statistical Significance Tests (Paired t-test, Wilcoxon, Holm-Bonferroni) & Benchmark Summaries
 python scripts/run_statistical_tests.py

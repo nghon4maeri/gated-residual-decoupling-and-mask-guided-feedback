@@ -5,11 +5,12 @@ Supports:
   1. Profiling exact Parameters (M), GFLOPs (@ 384x384), and auxiliary-head top-down
      boundary gradient norms ||dL / dZ_k||_2 across all 6 leave-one-out configurations
      plus the complexity-matched PlainMultiScaleConv control on ConvFormer-S18.
-  2. Training or evaluating any individual ablation configuration from configs/ablation_leave_one_out.yaml.
+  2. The configuration list shared with scripts/train_base.py, which trains one configuration
+     with the GDF-Net (Base) protocol.
 
 Usage:
     python scripts/run_ablation_suite.py --mode profile
-    python scripts/run_ablation_suite.py --mode train --config-id cfg5_mask_guided_detach --data-dir ./data/ISIC2018
+    python scripts/train_base.py --train-img ... --train-gt ... --val-img ... --val-gt ...                                  --ablation cfg5_mask_guided_detach --out-dir ./checkpoints/cfg5
 """
 
 import argparse
