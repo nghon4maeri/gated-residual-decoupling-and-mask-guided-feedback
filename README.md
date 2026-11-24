@@ -3,28 +3,78 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.6.0%2Bcu124-EE4C2C.svg)](https://pytorch.org/)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Venue](https://img.shields.io/badge/MIDL-2027-1B4F72.svg)](#citation)
+[![Venue](https://img.shields.io/badge/MIDL-2027-1B4F72.svg)](#6-citation)
 
 Official PyTorch implementation of **"GDF-Net: Gated Residual Decoupling and Mask-Guided Feedback for Medical Image Segmentation"**.
 
+![GDF-Net Architecture Overview](assets/fig1_gdfnet_architecture.png)
 
-## 1. Datasets: Descriptions, Download Guide & Samples
+---
 
-### 1.1 Overview of Evaluated Datasets
+## Table of Contents
 
-| Dataset | Clinical Modality | Target | Total Scans | Train / Val / Test Split | Resolution | Key Characteristics |
+1. [Pretrained Weights](#1-pretrained-weights)
+2. [Repository Structure](#2-repository-structure)
+3. [Datasets: Descriptions, Deterministic Splits & Download Guide](#3-datasets-descriptions-deterministic-splits--download-guide)
+4. [Results: Visualizations & Qualitative Samples](#4-results-visualizations--qualitative-samples)
+5. [Quick Start: Installation, Training, Ablation & Statistical Testing](#5-quick-start-installation-training-ablation--statistical-testing)
+6. [Citation](#6-citation)
+
+---
+
+## 1. Pretrained Weights
+
+All released checkpoints are standard PyTorch `.pth` state dicts (`29,503,181` parameters, `534` keys). Download them via the Kaggle CLI and verify that each one loads into `GDFNet` with `strict=True`:
+
+```bash
+python scripts/download_weights.py --out-dir ./checkpoints --download-kaggle --verify
+```
+
+| Checkpoint | Dataset | Variant |
+| :--- | :--- | :--- |
+| `GDFNet_ISIC2018_Base_M1_ConvFormerS18_300ep_best.pth` | ISIC-2018 | Base ($M_1$ teacher) |
+| `GDFNet_ISIC2018_Teacher_M2_LLRD_MultiScale_best.pth` | ISIC-2018 | $M_2$ multi-scale LLRD teacher |
+| `GDFNet_ISIC2018_Soup_M1_M4_WiSE_best.pth` | ISIC-2018 | Weight soup ($0.70 M_1 + 0.30 M_4$) |
+| `GDFNet_ISIC2018_RealTime_Distilled_Student_best.pth` | ISIC-2018 | Real-time distilled student |
+| `GDFNet_CVC_ClinicDB_ConvFormerS18_best.pth` | CVC-ClinicDB | Base |
+| `GDFNet_Kvasir_SEG_ConvFormerS18_best.pth` | Kvasir-SEG | Base |
+| `GDFNet_DSB2018_ConvFormerS18_best.pth` | DSB-2018 | Base |
+
+See [`MIDL_REPRODUCIBILITY_CHECKLIST.md`](MIDL_REPRODUCIBILITY_CHECKLIST.md) for the MIDL reproducibility checklist.
+
+---
+
+## 2. Repository Structure
+
+```text
+GDF-Net_GitHub_Release/
+├── gdfnet/      # Core package: models, losses, inference (Bi-ALT, TTA, weight soup), data, metrics
+├── scripts/     # Dataset/weight download, training, evaluation, ablation & profiling
+├── configs/     # YAML hyperparameters for main runs and ablations
+├── splits/      # Deterministic train/val/test split manifest
+├── tests/       # Unit tests for the model equations & ablation variants
+├── notebooks/   # Training & evaluation notebooks
+├── results/     # Benchmark CSV summaries
+└── assets/      # Figures used in this README
+```
+
+---
+
+## 3. Datasets: Descriptions, Deterministic Splits & Download Guide
+
+### 3.1 Overview of Evaluated Datasets
+
+| Dataset | Clinical Modality | Target | Total Scans | Train / Val / Test Split | Resolution | Key Clinical Challenges |
 | :--- | :--- | :--- | :---: | :---: | :---: | :--- |
-| **ISIC-2018 (Task 1)** | Dermoscopy (RGB) | Skin Lesions | `3,694` | `2,594` / `100` / `1,000` (Official) | $384 \times 384$ | Hair occlusion, optical vignetting, diffuse borders |
+| **ISIC-2018 (Task 1)** | Dermoscopy (RGB) | Skin Lesions | `3,694` | `2,594` / `100` / `1,000` (Official) | $384 \times 384$ | Hair occlusion, low contrast, optical vignetting, diffuse borders |
 | **CVC-ClinicDB** | Colonoscopy (RGB) | Colorectal Polyps | `612` | `490` / `61` / `61` (`80/10/10`) | $384 \times 384$ | Specular mucosal glare, flat sessile margins (29 sequences) |
-| **Kvasir-SEG** | GI Endoscopy (RGB) | GI Polyps | `1,000` | `800` / `100` / `100` (`80/10/10`) | $384 \times 384$ | Pedunculated polyp stalks, complex mucosal folds |
-| **DSB-2018** | Cellular Microscopy | Cell Nuclei ($\mathbf{Y} = \bigcup_k \mathbf{I}_k$) | `670` | `536` / `67` / `67` (`80/10/10`) | $256 \times 256$ | Clustered nuclei across brightfield & fluorescence |
+| **Kvasir-SEG** | GI Endoscopy (RGB) | GI Polyps | `1,000` | `800` / `100` / `100` (`80/10/10`) | $384 \times 384$ | Pedunculated polyp stalks, complex mucosal folds, variable scale |
+| **DSB-2018** | Cellular Microscopy | Cell Nuclei ($\mathbf{Y} = \bigcup_k \mathbf{I}_k$) | `670` | `536` / `67` / `67` (`80/10/10`) | $256 \times 256$ | Clustered nuclei across brightfield, histopathology & fluorescence |
 | **ISBI-2012 EM** | Electron Microscopy | Neuronal Membranes | `165` slices | `153` / `6` / `6` | $512 \times 512$ | Dense sub-pixel membrane filaments |
 | **CHASE-DB1** | Retinal Fundus | Retinal Vessels | `28` | `20` / `4` / `4` | $768 \times 768$ | Thin 1–2 px capillary bifurcations |
 | **DRIVE** | Retinal Fundus | Retinal Vessels | `20` | `12` / `2` / `6` | $576 \times 576$ | Low-contrast peripheral vessel branches |
 
----
-
-### 1.2 How to Download All Datasets
+### 3.2 How to Download All Datasets
 
 #### Option A: Automated CLI Script (Recommended)
 
@@ -65,9 +115,7 @@ kaggle datasets download -d khoongweihao/chasedb1 -p ./data/CHASE_DB1 --unzip
 kaggle datasets download -d andrewmvd/drive-digital-retinal-images-for-vessel-extraction -p ./data/DRIVE --unzip
 ```
 
----
-
-### 1.3 Dataset Descriptions & Representative Samples (1 Sample per Dataset)
+### 3.3 Dataset Descriptions & Representative Samples (1 Sample per Dataset)
 
 #### 1. ISIC-2018 (Dermoscopy Skin Lesion Segmentation)
 - **Description:** `3,694` dermoscopy scans across official splits of `2,594` train, `100` validation, and `1,000` test images ($384 \times 384$), featuring fuzzy borders, hair artifacts, and wide lesion scale variation.
@@ -98,58 +146,19 @@ kaggle datasets download -d andrewmvd/drive-digital-retinal-images-for-vessel-ex
 
 ---
 
-## 2. Results: Quantitative Benchmarks & Qualitative Samples
+## 4. Results: Visualizations & Qualitative Samples
 
-### 2.1 ISIC-2018 Official 1,000-Image Test Benchmark
+Full quantitative results (Dice, mIoU, HD95, ASD, BF2 and significance tests) are reported in the paper; the verified per-run summaries are provided as CSV files in [`results/`](results/) and can be regenerated with the commands in [Section 5](#5-quick-start-installation-training-ablation--statistical-testing).
 
-| Model / Variant | FPS | Macro Dice | mIoU | Median Dice | HD95 (px) | ASD (px) | Low-IoU ($J<0.65$) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| *U-Net (Ronneberger et al., 2015)* | 62.0$^\dagger$ | 0.8840 | 0.8012 | --- | --- | --- | --- |
-| *TransUNet (Chen et al., 2021)* | 18.2$^\dagger$ | 0.8840 | 0.8130 | --- | --- | --- | --- |
-| *Swin-Unet (Cao et al., 2022)* | 38.5$^\dagger$ | 0.8920 | 0.8250 | --- | --- | --- | --- |
-| *FAT-Net (Wu et al., 2022)* | 34.0$^\dagger$ | 0.8985 | 0.8310 | --- | --- | --- | --- |
-| *PVTv2-B2 (Wang et al., 2022)* | 41.2$^\dagger$ | 0.9020 | 0.8350 | --- | --- | --- | --- |
-| *EMCAD (Rahman et al., CVPR 2024)* | 31.4$^\dagger$ | 0.9020 | 0.8350 | --- | --- | --- | --- |
-| *MedNeXt-B (Roy et al., MICCAI 2023)* | 22.8$^\dagger$ | 0.9061 | 0.8385 | --- | --- | --- | --- |
-| **GDF-Net (Base, $\tau=0.50$)** | **31.3** | 0.9017 | 0.8332 | 0.9316 | 22.51 | 8.84 | 83 |
-| **GDF-Net (+Bi-ALT)** | **31.3** | 0.9105 | 0.8491 | 0.9446 | 21.84 | 8.25 | 88 |
-| **GDF-Net (Soup, SV)** | **31.3** | 0.9126 | <u>0.8519</u> | <u>0.9461</u> | <u>21.45</u> | 8.10 | 81 |
-| **GDF-Net (Real-Time) `[Ref.]`** | **31.3** | <u>0.9127</u> | 0.8516 | 0.9448 | 21.58 | <u>8.02</u> | **74** |
-| **GDF-Net (Ensemble, 8V)** | 3.8 | **0.9146** | **0.8554** | **0.9490** | **21.23** | **8.00** | <u>77</u> |
+### 4.1 Mechanistic Feature Visualization (MS-FDF & Mask-Guided LGAG)
 
----
+![MS-FDF and Mask-Guided LGAG Feature Visualization](assets/fig_msfdf_lgag_visualization.png)
 
-### 2.2 Multi-Dataset & Cross-Dataset Generalization
+### 4.2 Consolidated Qualitative Segmentation Results
 
-| Cohort / Transfer | Model / Variant | FPS | Macro Dice | mIoU | BF2 (2-px) | HD95 (px) | ASD (px) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **CVC-ClinicDB** ($384^2, N=61$) | PVTv2-B2 (Same-Split Baseline) | 28.4 | 0.9426 | 0.8951 | 0.6955 | 11.27 | 2.94 |
-| | GDF-Net (Base, $\tau=0.50$) | **31.3** | 0.9249 | 0.8757 | 0.6802 | 19.22 | 7.19 |
-| | GDF-Net (Soup, SV) | **31.3** | 0.9395 | 0.8899 | <u>0.6969</u> | <u>10.53</u> | <u>2.86</u> |
-| | **GDF-Net (Real-Time) `[Ref.]`** | **31.3** | <u>0.9397</u> | <u>0.8910</u> | 0.6957 | 15.74 | 3.74 |
-| | **GDF-Net (Ensemble, 8V)** | 3.8 | **0.9492** | **0.9056** | **0.7188** | **8.11** | **2.35** |
-| **Kvasir-SEG** ($384^2, N=100$) | PVTv2-B2 (Same-Split Baseline) | 28.4 | <u>0.9343</u> | <u>0.8889</u> | 0.6629 | 20.71 | 4.65 |
-| | GDF-Net (Base, $\tau=0.50$) | **31.3** | 0.9291 | 0.8824 | 0.6694 | 20.61 | 4.96 |
-| | GDF-Net (Soup, SV) | **31.3** | 0.9308 | 0.8859 | <u>0.6748</u> | 20.08 | 4.95 |
-| | **GDF-Net (Real-Time) `[Ref.]`** | **31.3** | **0.9409** | **0.8979** | **0.6802** | <u>19.63</u> | **4.48** |
-| | **GDF-Net (Ensemble, 8V)** | 3.8 | 0.9335 | 0.8896 | 0.6735 | **18.91** | <u>4.57</u> |
-| **DSB-2018** ($256^2, N=67$) | PVTv2-B2 (Same-Split Baseline) | 27.5 | 0.8919 | 0.8157 | 0.9152 | 9.36 | 2.85 |
-| | GDF-Net (Base, $\tau=0.50$) | **30.0** | 0.8955 | 0.8213 | 0.9198 | <u>9.32</u> | 2.69 |
-| | GDF-Net (Soup, SV) | **30.0** | 0.8941 | 0.8194 | 0.9161 | 9.34 | 2.72 |
-| | **GDF-Net (Real-Time) `[Ref.]`** | **30.0** | **0.8992** | **0.8265** | <u>0.9250</u> | 9.89 | <u>2.63</u> |
-| | **GDF-Net (Ensemble, 8V)** | 3.7 | <u>0.8974</u> | <u>0.8233</u> | **0.9260** | **9.18** | **2.61** |
-| **Zero-Shot: CVC $\to$ Kvasir** | GDF-Net (Base, $\tau=0.50$) | **31.3** | <u>0.8783</u> | **0.8146** | **0.5797** | <u>33.48</u> | **9.13** |
-| | **GDF-Net (Ensemble, 8V)** | 3.8 | **0.8789** | <u>0.8129</u> | <u>0.5415</u> | **31.75** | <u>9.17</u> |
-| **Zero-Shot: Kvasir $\to$ CVC** | GDF-Net (Base, $\tau=0.50$) | **31.3** | 0.7872 | 0.7279 | <u>0.5021</u> | 84.66 | <u>34.82</u> |
-| | GDF-Net (+Bi-ALT, SV) | **31.3** | <u>0.7884</u> | <u>0.7289</u> | 0.4955 | <u>84.64</u> | 34.87 |
-| | **GDF-Net (Ensemble, 8V)** | 3.8 | **0.8071** | **0.7497** | **0.5410** | **57.35** | **21.62** |
-
----
-
-### 2.3 Qualitative Segmentation Results (1 Sample Result per Dataset)
-
-#### Consolidated 4-Dataset Qualitative Comparison
 ![Consolidated 4-Dataset Qualitative Comparison](assets/fig5_qualitative_4datasets.png)
+
+### 4.3 Qualitative Segmentation Results (1 Sample Result per Dataset)
 
 #### 1. ISIC-2018 (Dermoscopy)
 ![ISIC-2018 Result Sample](assets/result_sample_isic2018.png)
@@ -163,7 +172,45 @@ kaggle datasets download -d andrewmvd/drive-digital-retinal-images-for-vessel-ex
 #### 4. DSB-2018 (Cellular Microscopy Nuclei)
 ![DSB-2018 Result Sample](assets/result_sample_dsb2018.png)
 
-#### 5. Extended Cohorts: ISBI-2012 EM-Dataset (`0.9525` Dice), CHASE-DB1 (`0.8238` Dice) & DRIVE (`0.7982` Dice)
+#### 5. Extended Cohorts: ISBI-2012 EM-Dataset, CHASE-DB1 & DRIVE
 ![EM-Dataset Result Sample](assets/result_sample_em_dataset.png)
 ![CHASE-DB1 Result Sample](assets/result_sample_chasedb1.png)
 ![DRIVE Result Sample](assets/result_sample_drive.png)
+
+---
+
+## 5. Quick Start: Installation, Training, Ablation & Statistical Testing
+
+```bash
+# 1. Install pinned dependencies (or create Conda env via environment.yml)
+pip install -r requirements.txt
+
+# 2. Run mathematical & architectural consistency unit tests (Eqs. 1-11 + 7 ablation configs)
+pytest tests/test_mathematical_consistency.py -v
+
+# 3. Download & verify pretrained checkpoints
+python scripts/download_weights.py --out-dir ./checkpoints --download-kaggle --verify
+
+# 4. Profile Fixed-Backbone (ConvFormer-S18) Leave-One-Out Ablation Complexity Matrix
+python scripts/run_ablation_suite.py --mode profile
+
+# 5. Run Statistical Significance Tests (Paired t-test, Wilcoxon, Holm-Bonferroni) & Benchmark Summaries
+python scripts/run_statistical_tests.py
+python scripts/evaluate_all_benchmarks.py
+
+# 6. Profile Hardware Latency (ms), Throughput (FPS) & Peak VRAM
+python scripts/profile_hardware.py --resolutions 256 384 512 768
+```
+
+---
+
+## 6. Citation
+
+```bibtex
+@inproceedings{nguyen2027gdfnet,
+  title     = {{GDF-Net}: Gated Residual Decoupling and Mask-Guided Feedback for Medical Image Segmentation},
+  author    = {Nguyen, Ho-Nam},
+  booktitle = {Medical Imaging with Deep Learning (MIDL)},
+  year      = {2027}
+}
+```

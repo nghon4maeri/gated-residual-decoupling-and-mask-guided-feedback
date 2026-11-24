@@ -1,0 +1,73 @@
+{
+  "manifest_version": "1.0.0",
+  "seed": 42,
+  "description": "Deterministic train/validation/test partition specification for all seven biomedical benchmarks in GDF-Net (MIDL 2027).",
+  "datasets": {
+    "ISIC-2018": {
+      "modality": "Dermoscopy (Skin Lesion Analysis Towards Melanoma Detection, Task 1)",
+      "resolution": [384, 384],
+      "split_protocol": "Official Challenge Partition (No Reshuffling)",
+      "train_count": 2594,
+      "val_count": 100,
+      "test_count": 1000,
+      "total_count": 3694,
+      "leakage_hygiene": "Strict separation: validation (N=100) used exclusively for checkpoint selection, soup weights (0.70/0.30), temperature (tau=2.0), and Bi-ALT T_base calibration."
+    },
+    "CVC-ClinicDB": {
+      "modality": "Colonoscopy (Colorectal Polyp Frames from 29 Video Sequences)",
+      "resolution": [384, 384],
+      "split_protocol": "Deterministic 80/10/10 sorted-filename shuffle with random.seed(42)",
+      "train_count": 490,
+      "val_count": 61,
+      "test_count": 61,
+      "total_count": 612,
+      "cross_dataset_transfer": "Evaluated zero-shot on Kvasir-SEG test set (N=100) without target fine-tuning."
+    },
+    "Kvasir-SEG": {
+      "modality": "Gastrointestinal Endoscopy (High-Resolution Colorectal Polyps)",
+      "resolution": [384, 384],
+      "split_protocol": "Deterministic 80/10/10 sorted-filename shuffle with random.seed(42)",
+      "train_count": 800,
+      "val_count": 100,
+      "test_count": 100,
+      "total_count": 1000,
+      "cross_dataset_transfer": "Evaluated zero-shot on CVC-ClinicDB test set (N=61) without target fine-tuning."
+    },
+    "DSB-2018": {
+      "modality": "Cellular Microscopy (2018 Data Science Bowl Stage 1 Train)",
+      "resolution": [256, 256],
+      "split_protocol": "Deterministic 80/10/10 sorted-folder-ID shuffle with random.seed(42); instance masks merged via logical union Y = U_k I_k",
+      "train_count": 536,
+      "val_count": 67,
+      "test_count": 67,
+      "total_count": 670
+    },
+    "ISBI-2012-EM": {
+      "modality": "Serial Section Transmission Electron Microscopy (Drosophila Larva VNC)",
+      "resolution": [512, 512],
+      "split_protocol": "Deterministic 80/10/10 slice partition with random.seed(42)",
+      "train_count": 24,
+      "val_count": 3,
+      "test_count": 3,
+      "total_count": 30
+    },
+    "CHASE-DB1": {
+      "modality": "Retinal Fundus Photography (Child Heart and Health Study in England)",
+      "resolution": [512, 512],
+      "split_protocol": "Deterministic 20/3/5 partition with random.seed(42)",
+      "train_count": 20,
+      "val_count": 3,
+      "test_count": 5,
+      "total_count": 28
+    },
+    "DRIVE": {
+      "modality": "Retinal Fundus Photography (Digital Retinal Images for Vessel Extraction)",
+      "resolution": [576, 576],
+      "split_protocol": "Deterministic 12/2/6 partition with random.seed(42)",
+      "train_count": 12,
+      "val_count": 2,
+      "test_count": 6,
+      "total_count": 20
+    }
+  }
+}

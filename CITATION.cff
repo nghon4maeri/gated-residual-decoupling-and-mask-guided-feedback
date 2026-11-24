@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use GDF-Net, its pretrained weights, or evaluation scripts in your research, please cite our MIDL 2027 paper."
+title: "GDF-Net: Gated Residual Decoupling and Mask-Guided Feedback for Medical Image Segmentation"
+type: software
+authors:
+  - family-names: "Nguyen"
+    given-names: "Ho-Nam"
+    orcid: "https://orcid.org/0009-0006-1062-8098"
+    affiliation: "Faculty of Information Technology, University of Science, VNU-HCM, Vietnam"
+repository-code: "https://github.com/nghon4maeri/feedback-attention-network"
+license: MIT
+version: "1.0.0"
+date-released: "2026-11-24"
+keywords:
+  - medical-image-segmentation
+  - metaformer
+  - spatial-residual-decoupling
+  - mask-guided-attention
+  - knowledge-distillation
+  - adaptive-thresholding
+  - midl-2027
+preferred-citation:
+  type: conference-paper
+  title: "GDF-Net: Gated Residual Decoupling and Mask-Guided Feedback for Medical Image Segmentation"
+  authors:
+    - family-names: "Nguyen"
+      given-names: "Ho-Nam"
+      orcid: "https://orcid.org/0009-0006-1062-8098"
+  collection-title: "Proceedings of Machine Learning Research (Medical Imaging with Deep Learning - MIDL 2027)"
+  year: 2027

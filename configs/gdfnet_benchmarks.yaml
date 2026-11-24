@@ -1,0 +1,66 @@
+# Declarative Configuration for GDF-Net Training, Weight Soup, Ensemble Distillation, and Bi-ALT
+# Covers ISIC-2018 (384x384), CVC-ClinicDB (384x384), Kvasir-SEG (384x384), DSB-2018 (256x256),
+# and Extended Benchmarks (ISBI-2012 EM-Dataset 512x512, CHASE-DB1 512x512, DRIVE 576x576).
+
+model:
+  name: "GDFNet"
+  backbone: "convformer_s18.sail_in22k_ft_in1k_384"
+  params_total: 29503181
+  state_dict_keys: 534
+  decoder_channels: 64
+  drop_path_rate: 0.15
+
+teachers_isic2018:
+  M1_canonical_base:
+    loss: "GDFNetCompositeLoss (0.50 StructureLoss[k=31, gamma=5.0] + 0.50 SoftMacroDice, DS weights=[1.0, 0.4, 0.3, 0.2, 0.1])"
+    lr: 5.0e-4
+    llrd: 0.65
+    epochs: 300
+  M2_multiscale_llrd:
+    loss: "GDFNetCompositeLoss + multi-scale training ({352, 384, 448})"
+    lr: 5.0e-4
+    llrd: 0.65
+    epochs: 300
+  M3_feedback_modulated:
+    architecture: "FeedbackGDFNet (2-pass spatial feedback modulator)"
+    loss: "GDFNetCompositeLoss"
+    lr: 5.0e-4
+    epochs: 300
+  M4_asymmetric_focal_tversky:
+    loss: "AsymmetricFocalTverskyLoss (alpha_FP=0.30, beta_FN=0.70, gamma=4/3, edge_weight=4.0, tversky_weight=1.2)"
+    lr: 3.5e-5
+    epochs: 50
+
+weight_soup:
+  formula: "theta_Soup = 0.70 * theta_M1 + 0.30 * theta_M4"
+  gem_ms_tta:
+    views: 8
+    scales: [1.0, 1.15, 0.85]
+    gem_p_isic: 1.75
+    gem_p_multidataset: 1.50
+
+knowledge_distillation:
+  init_checkpoint: "theta_Soup"
+  ema_decay: 0.996
+  temperature: 2.0
+  kd_weight: 0.55
+  gt_weight: 0.45
+  isic2018_epochs: 15
+  isic2018_lr: 4.5e-5
+  multidataset_epochs: 35
+  multidataset_lr: 4.0e-5
+
+bi_alt:
+  probes_anchored_at_074: [0.35, 0.50, 0.75]
+  diffuse_branch:
+    rho_min: 1.65
+    area_mid_min: 0.45
+    step_offset: 0.18
+    floor: 0.45
+  transitional_branch:
+    rho_min: 1.32
+    area_mid_min: 0.28
+    step_offset: 0.06
+    floor: 0.50
+  crisp_branch:
+    ceiling: 0.94

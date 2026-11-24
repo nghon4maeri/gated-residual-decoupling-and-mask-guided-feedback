@@ -1,0 +1,81 @@
+# Declarative Configuration for Fixed-Backbone Leave-One-Out Ablation & MS-FDF Control (Table 3 Panel A)
+# All configurations share the exact same ConvFormer-S18 encoder, MSCAM decoder, composite loss,
+# training protocol (300 epochs, AdamW lr=5e-4, LLRD=0.65, B=16, 384x384), and evaluation threshold (tau=0.50).
+
+backbone:
+  name: "convformer_s18.sail_in22k_ft_in1k_384"
+  pretrained: true
+  in_chans: 3
+  decoder_channels: 64
+  drop_path_rate: 0.15
+
+training:
+  dataset: "ISIC-2018"
+  img_size: 384
+  batch_size: 16
+  epochs: 300
+  optimizer: "AdamW"
+  base_lr: 5.0e-4
+  min_lr: 1.0e-6
+  weight_decay: 1.0e-4
+  llrd_factor: 0.65
+  grad_clip_norm: 1.0
+  amp_fp16: true
+  eval_threshold: 0.50
+
+ablation_configurations:
+  - id: "cfg1_baseline"
+    name: "Baseline (ConvFormer-S18 + MSCAM)"
+    use_msfdf: false
+    use_lgag: false
+    mask_guidance: false
+    detach_mask: false
+    msfdf_variant: "residual"
+
+  - id: "cfg2_msfdf_only"
+    name: "Baseline + MS-FDF"
+    use_msfdf: true
+    use_lgag: false
+    mask_guidance: false
+    detach_mask: false
+    msfdf_variant: "residual"
+
+  - id: "cfg3_lgag_only"
+    name: "Baseline + LGAG (Feature-Only)"
+    use_msfdf: false
+    use_lgag: true
+    mask_guidance: false
+    detach_mask: false
+    msfdf_variant: "residual"
+
+  - id: "cfg4_msfdf_lgag_nomask"
+    name: "Baseline + MS-FDF + LGAG (No Mask Guidance)"
+    use_msfdf: true
+    use_lgag: true
+    mask_guidance: false
+    detach_mask: false
+    msfdf_variant: "residual"
+
+  - id: "cfg5_mask_guided_detach"
+    name: "GDF-Net (Mask-Guided LGAG, Detached .detach())"
+    use_msfdf: true
+    use_lgag: true
+    mask_guidance: true
+    detach_mask: true
+    msfdf_variant: "residual"
+
+  - id: "cfg6_full_gdfnet_nodetach"
+    name: "GDF-Net (Full: MS-FDF + Differentiable Mask-Guided LGAG)"
+    use_msfdf: true
+    use_lgag: true
+    mask_guidance: true
+    detach_mask: false
+    msfdf_variant: "residual"
+
+  - id: "cfg7_plain_multiscale_control"
+    name: "Control: Plain Multi-Scale Conv (No Residual Decoupling, Matched Params/FLOPs)"
+    use_msfdf: true
+    use_lgag: true
+    mask_guidance: true
+    detach_mask: false
+    msfdf_variant: "plain_multiscale"

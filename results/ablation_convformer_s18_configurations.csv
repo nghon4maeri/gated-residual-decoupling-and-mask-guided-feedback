@@ -1,0 +1,8 @@
+ID,Configuration,MS-FDF,LGAG,Mask_Guidance,Grad_Through_Mask,Params_M,GFLOPs_384
+cfg1_baseline,Baseline (ConvFormer-S18 + MSCAM),No,No,No,No,25.99,38.04
+cfg2_msfdf_only,Baseline + MS-FDF,Yes,No,No,No,28.15,40.02
+cfg3_lgag_only,Baseline + LGAG (Feature-Only),No,Yes,No,No,27.34,41.11
+cfg4_msfdf_lgag_nomask,Baseline + MS-FDF + LGAG (No Mask),Yes,Yes,No,No,29.5,43.09
+cfg5_mask_guided_detach,Mask-Guided LGAG (Detached .detach()),Yes,Yes,Yes,No,29.5,43.09
+cfg6_full_gdfnet_nodetach,GDF-Net (Full: Differentiable Mask Feedback),Yes,Yes,Yes,Yes,29.5,43.09
+cfg7_plain_ms_control,Control: Plain Multi-Scale Conv (No Residual Sub.),No,Yes,Yes,Yes,29.5,43.09

@@ -1,0 +1,14 @@
+name: gdfnet
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pytorch=2.6.0
+  - torchvision=0.21.0
+  - pytorch-cuda=12.4
+  - pip
+  - pip:
+      - -r requirements.txt

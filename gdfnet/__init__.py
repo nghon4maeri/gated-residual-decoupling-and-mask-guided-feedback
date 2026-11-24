@@ -10,7 +10,9 @@ Official PyTorch implementation aligned 1:1 with the mathematical formulations i
 
 from .models import (
     HierarchicalBackbone,
+    MSFDF,
     MultiScaleFrequencyFilter,
+    PlainMultiScaleConv,
     MaskGuidedLGAG,
     MultiScaleConvolutionalAttentionModule,
     CascadedMSCAMDecoderBlock,
@@ -47,7 +49,9 @@ from .utils import (
 __version__ = "1.0.0"
 __all__ = [
     "HierarchicalBackbone",
+    "MSFDF",
     "MultiScaleFrequencyFilter",
+    "PlainMultiScaleConv",
     "MaskGuidedLGAG",
     "MultiScaleConvolutionalAttentionModule",
     "CascadedMSCAMDecoderBlock",

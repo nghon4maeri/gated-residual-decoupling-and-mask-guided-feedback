@@ -1,0 +1,32 @@
+name: GDF-Net Mathematical & Reproducibility CI
+
+on:
+  push:
+    branches: [ main, master, "remediation/**" ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  pytest-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install timm==1.0.12 albumentations==1.4.15 opencv-python-headless numpy scipy pandas Pillow scikit-learn scikit-image pytest
+
+      - name: Run Mathematical & Architectural Consistency Unit Tests
+        working-directory: GDF-Net_GitHub_Release
+        run: |
+          pytest tests/test_mathematical_consistency.py -v
+          python scripts/run_ablation_suite.py --mode profile
+          python scripts/evaluate_all_benchmarks.py

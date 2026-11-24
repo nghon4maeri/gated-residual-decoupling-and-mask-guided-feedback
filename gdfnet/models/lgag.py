@@ -8,7 +8,7 @@ Mathematical Formulation:
     1. Semantic Gating Projection:
          G = BN(Conv_{1x1}(Up_{x2}(D_{i+1})))
          F_sg = ~E_i + G
-    2. Differentiable Mask Prior Concatenation (NO .detach()):
+    2. Differentiable Mask Prior Concatenation (NO .detach() when detach_mask=False):
          M_up = Up_{x2}(M_{i+1})
          X_mid = ReLU(BN(Conv_{1x1}([F_sg || M_up])))
     3. Local (d=1) and Expanded-Context (d=2) Dilated Depthwise Branches:
@@ -18,7 +18,7 @@ Mathematical Formulation:
          S_i   = ReLU(BN(Conv_{3x3}(~E_i (x) alpha)))
 """
 
-from typing import Optional
+from typing import Optional, Tuple, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -30,14 +30,26 @@ class MaskGuidedLGAG(nn.Module):
 
     Combines local (d=1) and expanded-context (d=2) depthwise receptive fields guided
     by coarse global semantic priors (D_{i+1}, M_{i+1}) from deeper decoder stages.
-    Preserves end-to-end top-down boundary gradient flow by concatenating M_up without .detach().
+
+    Supports ablation flags:
+      - mask_guidance (bool): If False, zeros out the auxiliary mask channel M_up (feature-only LGAG).
+      - detach_mask (bool): If True, applies .detach() to M_{i+1} before concatenation.
     """
 
-    def __init__(self, skip_channels: int, gating_channels: int, out_channels: Optional[int] = None):
+    def __init__(
+        self,
+        skip_channels: int,
+        gating_channels: int,
+        out_channels: Optional[int] = None,
+        mask_guidance: bool = True,
+        detach_mask: bool = False,
+    ):
         super().__init__()
         out_channels = out_channels or skip_channels
         self.skip_channels = skip_channels
         self.gating_channels = gating_channels
+        self.mask_guidance = mask_guidance
+        self.detach_mask = detach_mask
 
         # Project upsampled decoder state D_{i+1} to match skip channels C_s
         self.g_proj = nn.Sequential(
@@ -79,16 +91,18 @@ class MaskGuidedLGAG(nn.Module):
         skip: torch.Tensor,
         gating: torch.Tensor,
         mask_prob: Optional[torch.Tensor] = None,
-    ) -> torch.Tensor:
+        return_attention: bool = False,
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         B, C, H, W = skip.shape
 
         # 1. Upsample deeper decoder state D_{i+1} and project: G = BN(Conv_{1x1}(Up_{x2}(D_{i+1})))
         g_up = F.interpolate(gating, size=(H, W), mode="bilinear", align_corners=False)
         g_proj = self.g_proj(g_up)
 
-        # 2. Upsample auxiliary mask prior M_{i+1} without .detach()
-        if mask_prob is not None:
-            m_up = F.interpolate(mask_prob, size=(H, W), mode="bilinear", align_corners=False)
+        # 2. Auxiliary mask prior M_{i+1} handling (differentiable vs. detached vs. disabled)
+        if mask_prob is not None and self.mask_guidance:
+            m_src = mask_prob.detach() if self.detach_mask else mask_prob
+            m_up = F.interpolate(m_src, size=(H, W), mode="bilinear", align_corners=False)
         else:
             m_up = torch.zeros((B, 1, H, W), device=skip.device, dtype=skip.dtype)
 
@@ -102,4 +116,7 @@ class MaskGuidedLGAG(nn.Module):
         alpha = self.attn_proj(k_sum)
 
         gated_skip = skip * alpha
-        return self.out_conv(gated_skip)
+        s_i = self.out_conv(gated_skip)
+        if return_attention:
+            return s_i, alpha
+        return s_i
