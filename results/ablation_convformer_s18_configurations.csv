@@ -1,8 +1,8 @@
-ID,Configuration,MS-FDF,LGAG,Mask_Guidance,Grad_Through_Mask,Params_M,GFLOPs_384
-cfg1_baseline,Baseline (ConvFormer-S18 + MSCAM),No,No,No,No,25.99,38.04
-cfg2_msfdf_only,Baseline + MS-FDF,Yes,No,No,No,28.15,40.02
-cfg3_lgag_only,Baseline + LGAG (Feature-Only),No,Yes,No,No,27.34,41.11
-cfg4_msfdf_lgag_nomask,Baseline + MS-FDF + LGAG (No Mask),Yes,Yes,No,No,29.5,43.09
-cfg5_mask_guided_detach,Mask-Guided LGAG (Detached .detach()),Yes,Yes,Yes,No,29.5,43.09
-cfg6_full_gdfnet_nodetach,GDF-Net (Full: Differentiable Mask Feedback),Yes,Yes,Yes,Yes,29.5,43.09
-cfg7_plain_ms_control,Control: Plain Multi-Scale Conv (No Residual Sub.),No,Yes,Yes,Yes,29.5,43.09
+ID,Configuration,MS-FDF,LGAG,Mask_Guidance,Grad_Through_Mask,Params_M,GFLOPs_384,Epochs,Best_Val_Dice,Best_Epoch,Best_Source,Test_Dice,Test_mIoU,Test_Med_Dice,Test_HD95,Test_ASD,Test_BF2,Low_IoU_lt_065
+cfg1_baseline,1. Baseline (S18 + MSCAM),No,No,No,No,25.99,38.04,300,0.9109,12,RAW,0.9039,0.8378,0.936,25.04,9.13,0.299,83
+cfg2_msfdf_only,2. + MS-FDF,Yes,No,No,No,28.15,40.02,300,0.9109,11,RAW,0.9064,0.8431,0.9401,24.1,8.85,0.3255,88
+cfg3_lgag_only,3. + LGAG (feature only),No,Yes,No,No,27.34,41.11,300,0.9069,53,RAW,0.893,0.8233,0.9315,26.52,10.25,0.2745,103
+cfg4_msfdf_lgag_nomask,4. + MS-FDF + LGAG (no mask),Yes,Yes,No,No,29.5,43.09,300,0.9054,60,RAW,0.8948,0.8231,0.928,25.75,10.02,0.2501,98
+cfg5_mask_guided_detach,5. Mask-guided (.detach()),Yes,Yes,Yes,No,29.5,43.09,300,0.9088,14,EMA,0.9009,0.834,0.9339,22.99,9.16,0.2505,92
+cfg7_plain_ms_control,6. Plain multi-scale control,Plain,Yes,Yes,Yes,29.5,43.09,300,0.9113,51,RAW,0.8984,0.8319,0.9348,25.29,9.71,0.2934,85
+cfg6_full_gdfnet_nodetach,"7. GDF-Net (Base, full)",Yes,Yes,Yes,Yes,29.5,43.09,300,0.9086,18,EMA,0.9017,0.8332,0.9316,22.51,8.84,0.2324,83

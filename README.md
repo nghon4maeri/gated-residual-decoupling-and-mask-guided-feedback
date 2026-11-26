@@ -42,6 +42,26 @@ python scripts/download_weights.py --out-dir ./checkpoints --download-kaggle --v
 
 See [`MIDL_REPRODUCIBILITY_CHECKLIST.md`](MIDL_REPRODUCIBILITY_CHECKLIST.md) for the MIDL reproducibility checklist.
 
+### 1.1 300-Epoch Leave-One-Out Ablation Checkpoints (ISIC-2018)
+
+All six new 300-epoch leave-one-out ablation checkpoints (`ConvFormer-S18` backbone, M1 training protocol, evaluated single-view at $\tau=0.50$ on the 1,000-image ISIC-2018 test split) are hosted in the public Kaggle dataset [`trnminh0108/gdfnet-isic2018-ablation-checkpoints`](https://www.kaggle.com/datasets/trnminh0108/gdfnet-isic2018-ablation-checkpoints):
+
+```bash
+kaggle datasets download -d trnminh0108/gdfnet-isic2018-ablation-checkpoints -p ./checkpoints/ablation --unzip
+```
+
+| Configuration | Params | GFLOPs | Test Dice | Test mIoU | HD95 (px) | ASD (px) | Low-IoU ($J<0.65$) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 1. Baseline (S18 + MSCAM) | 25.99M | 38.04 | 0.9039 | 0.8378 | 25.04 | 9.13 | 83 |
+| 2. + MS-FDF | 28.15M | 40.02 | **0.9064** | **0.8431** | 24.10 | 8.85 | 88 |
+| 3. + LGAG (feature only) | 27.34M | 41.11 | 0.8930 | 0.8233 | 26.52 | 10.25 | 103 |
+| 4. + MS-FDF + LGAG (no mask) | 29.50M | 43.09 | 0.8948 | 0.8231 | 25.75 | 10.02 | 98 |
+| 5. Mask-guided, `.detach()` | 29.50M | 43.09 | 0.9009 | 0.8340 | 22.99 | 9.16 | 92 |
+| 6. Plain multi-scale control | 29.50M | 43.09 | 0.8984 | 0.8319 | 25.29 | 9.71 | 85 |
+| 7. **GDF-Net (Base, full)** | 29.50M | 43.09 | 0.9017 | 0.8332 | **22.51** | **8.84** | **83** |
+
+Full per-metric summaries and Holm-Bonferroni corrected paired $t$-test / Wilcoxon signed-rank results against GDF-Net (Base, full) are saved in [`results/ablation_convformer_s18_configurations.csv`](results/ablation_convformer_s18_configurations.csv) and [`results/ablation_paired_tests_vs_m1.csv`](results/ablation_paired_tests_vs_m1.csv).
+
 ---
 
 ## 2. Repository Structure

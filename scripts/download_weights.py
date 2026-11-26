@@ -119,6 +119,11 @@ def main():
     parser = argparse.ArgumentParser(description="Download and verify GDF-Net pretrained weights.")
     parser.add_argument("--out-dir", type=str, default="./checkpoints", help="Target directory for checkpoints.")
     parser.add_argument("--download-kaggle", action="store_true", help="Pull checkpoints via Kaggle CLI.")
+    parser.add_argument(
+        "--download-ablation",
+        action="store_true",
+        help="Pull the 300-epoch ISIC-2018 ablation checkpoints from trnminh0108/gdfnet-isic2018-ablation-checkpoints.",
+    )
     parser.add_argument("--verify", action="store_true", help="Verify local checkpoints against GDFNet(strict=True).")
     args = parser.parse_args()
 
@@ -130,6 +135,13 @@ def main():
         for k in kernels:
             print(f"[*] Downloading kernel output: {k} -> {args.out_dir}")
             subprocess.run(["kaggle", "kernels", "output", k, "-p", args.out_dir], check=False)
+
+    if args.download_ablation:
+        abl_dir = os.path.join(args.out_dir, "ablation")
+        os.makedirs(abl_dir, exist_ok=True)
+        ds = "trnminh0108/gdfnet-isic2018-ablation-checkpoints"
+        print(f"[*] Downloading ablation dataset: {ds} -> {abl_dir}")
+        subprocess.run(["kaggle", "datasets", "download", "-d", ds, "-p", abl_dir, "--unzip"], check=False)
 
     if args.verify:
         import torch
