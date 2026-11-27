@@ -19,7 +19,7 @@ This document maps every requirement of the **[MIDL Reproducibility Guidelines](
 | :--- | :---: | :--- |
 | **Is the code publicly available?** | **Yes** | Released under the permissive **MIT License** (`LICENSE`). |
 | **Do property rights permit making the code public?** | **Yes** | All code is original research software released under the MIT License with no institutional or proprietary restrictions. |
-| **Is a link to a long-term public Git repository included in the main body of the paper?** | **Yes** | Explicitly linked in Section 4 (*Experimental Setup*) of the main manuscript (`https://github.com/nghon4maeri/feedback-attention-network`, anonymized as `https://anonymous.4open.science/r/GDF-Net-MIDL2027` in blind review builds). |
+| **Is a link to a long-term public Git repository included in the main body of the paper?** | **Yes** | Explicitly linked in Section 4 (*Experimental Setup*) of the main manuscript (`https://github.com/nghon4maeri/gated-residual-decoupling-and-mask-guided-feedback`, anonymized as `https://anonymous.4open.science/r/GDF-Net-MIDL2027` in blind review builds). |
 | **Are dependencies, environment specifications, and containerization provided?** | **Yes** | Provided in `requirements.txt` (pinned versions), `environment.yml` (Conda environment), `Dockerfile` (CUDA 12.4 + PyTorch 2.6.0 container), and `.github/workflows/ci.yml` (automated unit test CI). |
 
 ---
@@ -28,8 +28,8 @@ This document maps every requirement of the **[MIDL Reproducibility Guidelines](
 
 | MIDL Reproducibility Question | Answer | Verification & Location in Paper / Repository |
 | :--- | :---: | :--- |
-| **Is the presented trained model publicly available?** | **Yes** | All trained checkpoints (`.pth`, PyTorch `state_dict` format, 534 keys, 29,503,181 parameters) for ISIC-2018, CVC-ClinicDB, Kvasir-SEG, and DSB-2018 are released as Kaggle kernel outputs. |
-| **Are weights hosted on long-term storage platforms?** | **Yes** | `scripts/download_weights.py` downloads the checkpoints via the Kaggle CLI and verifies each one by strict `state_dict` loading into `GDFNet`. |
+| **Is the presented trained model publicly available?** | **Yes** | All trained checkpoints (`.pth`, PyTorch `state_dict` format, 534 keys, 29,503,181 parameters) for ISIC-2018, CVC-ClinicDB, Kvasir-SEG, and DSB-2018 are released via Kaggle (`scripts/download_weights.py`), plus all six 300-epoch leave-one-out ablation checkpoints at `trnminh0108/gdfnet-isic2018-ablation-checkpoints`. |
+| **Are weights hosted on long-term storage platforms?** | **Yes** | `scripts/download_weights.py --download-kaggle --download-ablation` downloads the checkpoints via the Kaggle CLI and verifies each one by strict `state_dict` loading into `GDFNet`. |
 | **Are standard open model formats used?** | **Yes** | Standard PyTorch `.pth` state dictionaries (`torch.load(..., weights_only=True)`) and optional ONNX export (`scripts/profile_hardware.py --export-onnx`). |
 
 ---
@@ -48,8 +48,8 @@ This document maps every requirement of the **[MIDL Reproducibility Guidelines](
 
 | Manuscript Artifact | Reproducibility Command | Verified Output File |
 | :--- | :--- | :--- |
-| **Mathematical & Ablation Unit Tests** (Eqs. 1–11, 6 Ablation Configs) | `pytest tests/test_mathematical_consistency.py -v` | 100% passing assertions (29,503,181 params, 534 keys, gradient flow) |
+| **Mathematical & Ablation Unit Tests** (Eqs. 1–11, 7 Ablation Configs) | `pytest tests/test_mathematical_consistency.py -v` | 100% passing assertions (29,503,181 params, 534 keys, gradient flow) |
 | **Table 1 & Table 2** (ISIC-2018 & Multi-Dataset Benchmarks + Statistical Tests) | `python scripts/run_statistical_tests.py` | Paired $t$-test & Wilcoxon $p$-values vs. `GDF-Net (Real-Time) [Ref.]` |
-| **Table 3** (Fixed-Backbone Leave-One-Out Ablation & Lesion Stratification) | `python scripts/run_ablation_suite.py --config configs/ablation_leave_one_out.yaml` | `results/ablation_convformer_s18_summary.csv` |
+| **Table 3** (300-Epoch Fixed-Backbone Leave-One-Out Ablation & Lesion Stratification) | `python scripts/train_ablation_isic2018.py --config cfg1_baseline` | `results/ablation_convformer_s18_configurations.csv`, `results/ablation_paired_tests_vs_m1.csv` |
 | **Appendix Table 4 & Figure 6** (Bi-ALT Sensitivity & Adaptive Threshold Comparison) | `python scripts/evaluate_all_benchmarks.py --include-bialt-sensitivity` | `results/bialt_125grid_validation_sensitivity.csv` |
 | **Appendix Table 6** (Multi-Resolution RTX 4060 Latency, FPS & VRAM Profiling) | `python scripts/profile_hardware.py --resolutions 256 384 512` | `results/rtx4060_multires_hardware_profiling.csv` |
